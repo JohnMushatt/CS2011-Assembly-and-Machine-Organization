@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include <getopt.h>
 #include <stdio.h>
+#include <string.h>
 
 typedef unsigned long long address;
 typedef struct {
@@ -164,7 +165,7 @@ cParms insert(cache c, cParms parms, address a) {
 }
 
 int main(int argc, char **argv) {
-	cParms *cacheParms;
+	cParms cacheParms;
 	//Trace file pointer
 	char tFile;
 	//Variable to hold current comand line argument
@@ -173,13 +174,13 @@ int main(int argc, char **argv) {
 	//Loop through the command line arguments, making sure they exist and are correct
 	while (argument = getopt(argc, argv, "s:E:b:t:vh") != -1) {
 		if (argument == 's') {
-			cacheParms->s = atoi(optarg);
+			cacheParms.s = atoi(optarg);
 		}
 		if (argument == 'E') {
-			cacheParms->E = atoi(optarg);
+			cacheParms.E = atoi(optarg);
 		}
 		if (argument == 'b') {
-			cacheParms->b = atoi(optarg);
+			cacheParms.b = atoi(optarg);
 
 		}
 		if (argument == 't') {
@@ -194,38 +195,77 @@ int main(int argc, char **argv) {
 
 	FILE *file;
 	file = fopen(tFile, "r");
-	cache simCache = buildCache(cacheParms->S,cacheParms->E);
+	cache simCache = buildCache(cacheParms.S, cacheParms.E);
 
-	if(file !=0) {
+	if (file != 0) {
 		char instruction;
 		address a;
 		int size;
 
-		while(fscan(file, " %c %llx, %d", &instruction,&a,&size)==3) {
-			int recentHits = cacheParms->hits;
-			int recentMisses = cacheParms->miss;
-			int recentEvictions = cacheParms->evictions;
+		while (fscanf(file, " %c %llx, %d", &instruction, &a, &size) == 3) {
+			int recentHits = cacheParms.hits;
+			int recentMisses = cacheParms.miss;
+			int recentEvictions = cacheParms.evictions;
 
-
-			if(instruction=='M') {
-					if(verbosity==1) {
-						prinf("M %llx, %d",a,size);
-						for(int i =0; i < 2; i++) {
-							cacheParms = insert(simCache, cacheParms,a);
-							if(recentMisses !=cacheParms->miss) {
-								printf(" miss");
-							}
-							else if(recentHits !=cacheParms->hits) {
-								printf(" hit");
-							}
-							else if(recentEvictions != cacheParms->evictions) {
-								printf(" eviction");
-							}
+			if (instruction == 'M') {
+				if (verbosity == 1) {
+					printf("M %llx, %d", a, size);
+					for (int i = 0; i < 2; i++) {
+						cacheParms = insert(simCache, cacheParms, a);
+						if (recentMisses != cacheParms.miss) {
+							printf(" miss");
+						} else if (recentHits != cacheParms.hits) {
+							printf(" hit");
+						} else if (recentEvictions != cacheParms.evictions) {
+							printf(" eviction");
 						}
+						recentHits=0;
+						recentMisses=0;
+						recentEvictions=0;
 					}
+					printf("\n");
+				}
+				else {
+					cacheParms = insert(simCache,cacheParms,a);
+					cacheParms = insert(simCache,cacheParms,a);
+				}
+			}
+			if (instruction == 'S') {
+				cacheParms = insert(simCache, cacheParms, a);
+				if (verbosity == 1) {
+					printf("S %llx, %d", a, size);
+					if (recentMisses != cacheParms.miss) {
+						printf(" miss");
+					} else if (recentHits != cacheParms.hits) {
+						printf(" hit");
+					} else if (recentEvictions != cacheParms.evictions) {
+						printf(" eviction");
+					}
+					printf("\n");
+				}
+			}
+			if(instruction == 'L') {
+				cacheParms = insert(simCache,cacheParms,a);
+				if(verbosity ==1) {
+					printf("L %llx, %d",a,size);
+					if(recentMisses!= cacheParms.miss) {
+						printf(" miss");
+					}
+					else if(recentHits != cacheParms.hits) {
+						printf(" hit");
+					}
+					else if(recentEvictions !=cacheParms.evictions) {
+						printf(" eviction");
+					}
+				}
 			}
 		}
 	}
-
-
+	else {
+		// File unreadable
+				fprintf( stderr, "ERROR: Can't open file: %s\n", tFile);
+				return 1;
+	}
+	fclose(file);
+	printSummary(cacheParms.hits, cacheParms.miss, cacheParms.evictions);
 }
