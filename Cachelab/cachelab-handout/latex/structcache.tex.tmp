@@ -1,0 +1,20 @@
+\hypertarget{structcache}{}\section{cache Struct Reference}
+\label{structcache}\index{cache@{cache}}
+
+
+Collaboration diagram for cache\+:
+% FIG 0
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{structcache_a59a3830e2b4126208814f2fbc4f8f33e}\label{structcache_a59a3830e2b4126208814f2fbc4f8f33e}} 
+\hyperlink{structcacheSet}{cache\+Set} $\ast$ {\bfseries sets}
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Actual cache, holds a 1D array of sets to represent cache 
+
+The documentation for this struct was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+csim.\+c\end{DoxyCompactItemize}

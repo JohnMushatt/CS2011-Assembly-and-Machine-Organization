@@ -21,6 +21,9 @@ tracegen: tracegen.c trans.o cachelab.c
 trans.o: trans.c
 	$(CC) $(CFLAGS) -O0 -c trans.c
 
+#Doxygen file:
+docs:
+	doxygen
 #
 # Clean the src dirctory
 #
